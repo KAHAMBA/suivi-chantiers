@@ -76,6 +76,7 @@ td.n,th.n{text-align:right}td.act{white-space:nowrap;text-align:right;padding:6p
 .kc small{color:var(--muted);display:block;margin-top:2px}.kc .row{margin-top:8px;gap:6px}
 .kc-act{display:flex;align-items:center;gap:4px;margin-top:10px}
 .status-sel{flex:1;min-width:0;border:1px solid #cfdcd5;border-radius:9px;padding:6px 8px;background:#fff;font-size:13px;cursor:pointer}
+.field.half{flex:1 1 calc(50% - 10px);min-width:0}.field.full{flex:1 1 100%}
 .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;flex:1;min-width:140px}
 .field label{font-size:13px;font-weight:600;color:var(--muted)}
 .field input,.field select,.field textarea,.input{border:1px solid #c9d6cf;border-radius:10px;padding:9px 11px;background:#fff;width:100%;transition:border-color .15s,box-shadow .15s}
@@ -150,3 +151,28 @@ input::placeholder,textarea::placeholder{color:#7d8f87}
 }
 @media(max-width:480px){.kpis strong{font-size:24px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Longs e-mails et textes : coupure propre */
+td,.prof b,.orgname,.kc,.dlist span,.lede,.tip,.empty p,.toast{overflow-wrap:anywhere}
+.rt td{min-width:0}
+/* Encoches et zones sûres */
+.mbar{padding-top:max(8px,env(safe-area-inset-top));padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+.toast{bottom:max(20px,calc(env(safe-area-inset-bottom) + 10px))}
+/* Menu : défile dans sa zone, hauteur réelle de l'écran */
+.nav{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;min-height:0}
+/* Tablette : palier 768 px */
+@media(min-width:721px) and (max-width:1024px){
+  .main{padding:26px max(32px,env(safe-area-inset-right)) 70px max(32px,env(safe-area-inset-left))}
+  .modal{width:min(680px,100%)}
+  .kanban{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .kc-act .icon-btn{width:38px;height:38px}
+}
+@media(max-width:900px){
+  .main{padding:18px max(14px,env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+  .side{height:100dvh;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom));padding-left:max(12px,env(safe-area-inset-left));overflow-y:auto;overscroll-behavior:contain}
+  .side .nav{flex:none;overflow:visible}
+}
+@media(max-width:900px) and (min-width:721px){.kanban{grid-template-columns:repeat(3,minmax(0,1fr))}.top{flex-direction:row;align-items:flex-end}.top .row{width:auto}}
+@media(max-width:600px){.field.half{flex:1 1 100%}.modal{padding-bottom:max(18px,env(safe-area-inset-bottom))}}
+@media(max-width:900px) and (max-height:520px){.logo img{height:44px}.nav button{padding:9px 12px}.prof{margin-top:6px}}
+@media(max-width:900px){.overlay{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}}

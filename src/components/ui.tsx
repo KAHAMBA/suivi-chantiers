@@ -34,7 +34,7 @@ export function FormModal({ title, fields, initial, onSubmit, onClose, submitLab
       <form onSubmit={submit}>
         <div className="row" style={{ alignItems: "flex-start" }}>
           {fields.map((f) => (
-            <div className="field" key={f.name} style={f.half ? { minWidth: 160 } : { flexBasis: "100%" }}>
+            <div className={"field" + (f.half ? " half" : " full")} key={f.name}>
               <label htmlFor={"f-" + f.name}>{f.label}{f.required ? " *" : ""}</label>
               {f.type === "select" ? (
                 <select id={"f-" + f.name} value={v[f.name] ?? ""} onChange={(e) => setV({ ...v, [f.name]: e.target.value })}>
