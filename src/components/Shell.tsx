@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useOrg } from "../state/org";
 import type { OrgInfo } from "../lib/types";
 import { ROLE_LABEL } from "../lib/util";
@@ -22,15 +22,22 @@ export function Shell({ orgs, view, setView, onOrg, user, onLogout, children }: 
 }) {
   const { org, data } = useOrg();
   const role = data?.role ?? org.role;
+  const [open, setOpen] = useState(false);
+  const go = (id: string) => { setView(id); setOpen(false); window.scrollTo({ top: 0 }); };
   return (
     <div className="app">
-      <aside className="side">
+      <header className="mbar">
+        <button className="burger" aria-label="Ouvrir le menu" aria-expanded={open} onClick={() => setOpen(!open)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg></button>
+        <img src="/logo.png" alt="NeoGTec" /><span className="mtitle">{NAV.find((n) => n.id === view)?.label}</span>
+      </header>
+      {open && <div className="scrim" onClick={() => setOpen(false)} />}
+      <aside className={"side" + (open ? " open" : "")}>
         <div className="logo"><img src="/logo.png" alt="NeoGTec" /></div>
         <div className="orgname">{org.nom} · plan {org.plan}</div>
         {orgs.length > 1 && <select aria-label="Entreprise" value={org.id} onChange={(e) => onOrg(e.target.value)}>{orgs.map((o) => <option key={o.id} value={o.id}>{o.nom}</option>)}</select>}
         <nav className="nav" aria-label="Navigation principale">
           {NAV.map((n) => (
-            <button key={n.id} className={view === n.id ? "on" : ""} onClick={() => setView(n.id)} aria-current={view === n.id ? "page" : undefined}>
+            <button key={n.id} className={view === n.id ? "on" : ""} onClick={() => go(n.id)} aria-current={view === n.id ? "page" : undefined}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d={n.d} /></svg>{n.label}
             </button>
           ))}
