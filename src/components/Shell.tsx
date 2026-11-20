@@ -25,7 +25,7 @@ export function Shell({ orgs, view, setView, onOrg, user, onLogout, children }: 
   return (
     <div className="app">
       <aside className="side">
-        <div className="logo">Suivi <b>Chantiers</b></div>
+        <div className="logo"><img src="/logo.png" alt="NeoGTec" /></div>
         <div className="orgname">{org.nom} · plan {org.plan}</div>
         {orgs.length > 1 && <select aria-label="Entreprise" value={org.id} onChange={(e) => onOrg(e.target.value)}>{orgs.map((o) => <option key={o.id} value={o.id}>{o.nom}</option>)}</select>}
         <nav className="nav" aria-label="Navigation principale">

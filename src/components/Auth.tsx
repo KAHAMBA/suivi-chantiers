@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabase";
 import { api } from "../lib/api";
 
 function Brand() {
-  return <div className="brand"><h1>Suivi <b>Chantiers</b></h1><p>La plateforme de suivi de vos projets d’infrastructure : chantiers, tâches journalières, rapports, planning, budget, qualité et sécurité — pour toute votre équipe.</p></div>;
+  return <div className="brand"><img className="brand-logo" src="/logo.png" alt="NeoGTec" /><h1>Suivi <b>Chantiers</b></h1><p>La plateforme de suivi de vos projets d’infrastructure : chantiers, tâches journalières, rapports, planning, budget, qualité et sécurité — pour toute votre équipe.</p></div>;
 }
 
 export function AuthScreen({ recovery }: { recovery: boolean }) {
