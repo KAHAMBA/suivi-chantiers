@@ -1,3 +1,4 @@
+import { Icon } from "../components/Icon";
 import { useOrg } from "../state/org";
 import { ProjectFilter, inProject } from "../components/Shell";
 import { Top, type FieldDef } from "../components/ui";
@@ -19,7 +20,7 @@ export function Team() {
   const rows = inProject(data.team, project);
   return (
     <>
-      <Top title="Équipe de chantier" sub="Intervenants par chantier"><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}>+ Intervenant</button>}</Top>
+      <Top title="Équipe de chantier" sub="Intervenants par chantier"><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Intervenant</button>}</Top>
       <div className="card"><Table crud={crud} rows={rows} empty="Aucun intervenant."
         cols={[{ h: "Nom", f: (r) => <b>{r.nom}</b> }, { h: "Fonction", f: (r) => r.role }, { h: "Chantier", f: (r) => pname(r.project_id) }, { h: "Téléphone", f: (r) => r.tel ?? "—" }]} /></div>
       {crud.modal}

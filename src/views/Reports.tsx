@@ -1,3 +1,4 @@
+import { Icon } from "../components/Icon";
 import { useOrg } from "../state/org";
 import { ProjectFilter, inProject } from "../components/Shell";
 import { Top, type FieldDef } from "../components/ui";
@@ -21,7 +22,7 @@ export function Reports() {
   const rows = inProject(data.reports, project).slice().sort((a, b) => b.date.localeCompare(a.date));
   return (
     <>
-      <Top title="Rapports journaliers" sub="Ce qui s’est passé sur le chantier, jour après jour"><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}>+ Nouveau rapport</button>}</Top>
+      <Top title="Rapports journaliers" sub="Ce qui s’est passé sur le chantier, jour après jour"><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Nouveau rapport</button>}</Top>
       <div className="card"><Table crud={crud} rows={rows} empty="Aucun rapport."
         cols={[{ h: "Date", f: (r) => fd(r.date) }, { h: "Chantier", f: (r) => pname(r.project_id) }, { h: "Météo", f: (r) => r.meteo ?? "—" }, { h: "Effectif", n: true, f: (r) => r.effectif ?? "—" },
           { h: "Travaux réalisés", f: (r) => r.travaux }, { h: "Problèmes", f: (r) => r.problemes ? <span style={{ color: "var(--bad)" }}>{r.problemes}</span> : "—" }, { h: "Saisi par", f: (r) => names(r.created_by) }]} /></div>

@@ -1,3 +1,4 @@
+import { Icon } from "../components/Icon";
 import { useState } from "react";
 import { api } from "../lib/api";
 import { useOrg } from "../state/org";
@@ -41,7 +42,7 @@ export function Projects() {
     return (
       <>
         <Top title={p.nom} sub={`${p.nature ?? ""} · ${p.lieu ?? ""}`}>
-          <button className="btn ghost" onClick={() => setSel(null)}>← Chantiers</button>
+          <button className="btn ghost" onClick={() => setSel(null)}><Icon n="back" /> Chantiers</button>
           {canManage && <><button className="btn ghost" onClick={() => setEdit({ row: p })}>Modifier</button>
             <button className="btn danger" onClick={async () => { if (window.confirm("Supprimer ce chantier et toutes ses données ?")) { try { await remove("projects", p.id); setSel(null); toast("Chantier supprimé."); } catch (e: any) { toast(e.message, true); } } }}>Supprimer</button></>}
         </Top>
@@ -63,7 +64,7 @@ export function Projects() {
   }
   return (
     <>
-      <Top title="Chantiers" sub={`${data.projects.length} chantier(s)`}>{canManage && <button className="btn" onClick={() => setEdit({})}>+ Nouveau chantier</button>}</Top>
+      <Top title="Chantiers" sub={`${data.projects.length} chantier(s)`}>{canManage && <button className="btn" onClick={() => setEdit({})}><Icon n="plus" /> Nouveau chantier</button>}</Top>
       {!data.projects.length ? <div className="card"><Empty>Aucun chantier. {canManage ? "Cliquez sur « Nouveau chantier »." : "Un conducteur des travaux ou un administrateur peut en créer."}</Empty></div> :
         <div className="card"><table><thead><tr><th>Chantier</th><th>Lieu</th><th>Période</th><th className="n">Budget</th><th>Avancement</th></tr></thead>
           <tbody>{data.projects.map((x) => { const av = progress(data.phases.filter((ph) => ph.project_id === x.id)); return (

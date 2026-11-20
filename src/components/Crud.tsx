@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { useOrg } from "../state/org";
 import type { TableName } from "../lib/types";
+import { Icon } from "./Icon";
 import { Empty, FormModal, useToast, type FieldDef } from "./ui";
 
 export interface Col<T> { h: string; f: (r: T) => ReactNode; n?: boolean }
@@ -32,8 +33,8 @@ export function useCrud<T extends { id: string }>(table: TableName, fields: Fiel
 export function Table<T extends { id: string }>({ cols, rows, empty, crud }: { cols: Col<T>[]; rows: T[]; empty: string; crud?: { allowed: boolean; editRow: (r: T) => void; del: (r: T) => void } }) {
   if (!rows.length) return <Empty>{empty}</Empty>;
   return (
-    <table><thead><tr>{cols.map((c) => <th key={c.h} className={c.n ? "n" : ""}>{c.h}</th>)}{crud?.allowed && <th />}</tr></thead>
-      <tbody>{rows.map((r) => <tr key={r.id}>{cols.map((c) => <td key={c.h} className={c.n ? "n" : ""}>{c.f(r)}</td>)}
-        {crud?.allowed && <td style={{ whiteSpace: "nowrap" }}><button className="btn ghost sm" onClick={() => crud.editRow(r)}>Modifier</button> <button className="btn ghost sm" onClick={() => crud.del(r)} aria-label="Supprimer">✕</button></td>}</tr>)}</tbody></table>
+    <table className="rt"><thead><tr>{cols.map((c) => <th key={c.h} className={c.n ? "n" : ""}>{c.h}</th>)}{crud?.allowed && <th><span className="sr">Actions</span></th>}</tr></thead>
+      <tbody>{rows.map((r) => <tr key={r.id}>{cols.map((c) => <td key={c.h} data-label={c.h} className={c.n ? "n" : ""}>{c.f(r)}</td>)}
+        {crud?.allowed && <td className="act"><button className="icon-btn" onClick={() => crud.editRow(r)} aria-label="Modifier" title="Modifier"><Icon n="edit" /></button><button className="icon-btn danger" onClick={() => crud.del(r)} aria-label="Supprimer" title="Supprimer"><Icon n="trash" /></button></td>}</tr>)}</tbody></table>
   );
 }

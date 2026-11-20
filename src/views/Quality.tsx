@@ -1,3 +1,4 @@
+import { Icon } from "../components/Icon";
 import { useOrg } from "../state/org";
 import { ProjectFilter, inProject } from "../components/Shell";
 import { Pill, Top, type FieldDef } from "../components/ui";
@@ -21,7 +22,7 @@ export function Quality() {
   const ok = rows.filter((c) => c.resultat === "Conforme").length, open = rows.filter((c) => c.resultat === "Défaut ouvert").length;
   return (
     <>
-      <Top title="Qualité" sub={`${rows.length} contrôle(s) · ${ok} conforme(s) · ${open} défaut(s) ouvert(s)`}><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}>+ Contrôle</button>}</Top>
+      <Top title="Qualité" sub={`${rows.length} contrôle(s) · ${ok} conforme(s) · ${open} défaut(s) ouvert(s)`}><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Contrôle</button>}</Top>
       <div className="card"><Table crud={crud} rows={rows} empty="Aucun contrôle enregistré."
         cols={[{ h: "Date", f: (r) => fd(r.date) }, { h: "Chantier", f: (r) => pname(r.project_id) }, { h: "Contrôle", f: (r) => r.type },
           { h: "Résultat", f: (r) => <Pill kind={r.resultat === "Défaut ouvert" ? "bad" : ""}>{r.resultat}</Pill> }, { h: "Observations", f: (r) => r.note ?? "—" }]} /></div>

@@ -5,7 +5,7 @@ import { api } from "./lib/api";
 import type { SessionInfo } from "./lib/types";
 import { AuthScreen, Onboarding } from "./components/Auth";
 import { Shell } from "./components/Shell";
-import { ToastProvider } from "./components/ui";
+import { Skeleton, ToastProvider } from "./components/ui";
 import { OrgProvider, useOrg } from "./state/org";
 import { Dashboard } from "./views/Dashboard";
 import { Projects } from "./views/Projects";
@@ -20,7 +20,7 @@ import { Access } from "./views/Access";
 
 function Views({ view, go }: { view: string; go: (v: string) => void }) {
   const { data } = useOrg();
-  if (!data) return <div className="empty">Chargement…</div>;
+  if (!data) return <Skeleton rows={4} />;
   switch (view) {
     case "proj": return <Projects />;
     case "task": return <Tasks />;

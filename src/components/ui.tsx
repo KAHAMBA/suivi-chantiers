@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 
 type ToastFn = (msg: string, err?: boolean) => void;
@@ -56,8 +57,14 @@ export function FormModal({ title, fields, initial, onSubmit, onClose, submitLab
 }
 
 export const Pill = ({ kind = "", children }: { kind?: "" | "bad" | "warn" | "grey"; children: ReactNode }) => <span className={"pill " + kind}>{children}</span>;
-export const Bar = ({ value, red }: { value: number; red?: boolean }) => <div className={"bar" + (red ? " red" : "")} title={`${Math.round(value)} %`}><i style={{ width: `${Math.max(0, Math.min(100, value))}%` }} /></div>;
+export const Bar = ({ value, red }: { value: number; red?: boolean }) => <div className={"bar" + (red ? " red" : "")} title={`${Math.round(value)} %`}><i style={{ transform: `scaleX(${Math.max(0, Math.min(100, value)) / 100})` }} /></div>;
 export const Empty = ({ children }: { children: ReactNode }) => <div className="empty">{children}</div>;
+export function EmptyState({ title, text, action }: { title: string; text?: string; action?: ReactNode }) {
+  return <div className="empty"><div className="empty-mark"><Icon n="building" size={26} /></div><h3>{title}</h3>{text && <p>{text}</p>}{action}</div>;
+}
+export function Skeleton({ rows = 4 }: { rows?: number }) {
+  return <div aria-busy="true" aria-label="Chargement" className="skel-wrap"><div className="skel" style={{ height: 30, width: "42%" }} />{Array.from({ length: rows }).map((_, i) => <div className="skel" key={i} style={{ height: 64 }} />)}</div>;
+}
 
 export function Top({ title, sub, children }: { title: string; sub?: string; children?: ReactNode }) {
   return <div className="top"><div><h1>{title}</h1>{sub && <p>{sub}</p>}</div><div className="row">{children}</div></div>;

@@ -1,3 +1,4 @@
+import { Icon } from "../components/Icon";
 import { useOrg } from "../state/org";
 import { ProjectFilter, inProject } from "../components/Shell";
 import { Bar, Top, type FieldDef } from "../components/ui";
@@ -24,7 +25,7 @@ export function Budget() {
   const tp = projects.reduce((s, p) => s + Number(p.budget), 0), td = ex.reduce((s, e) => s + Number(e.montant), 0);
   return (
     <>
-      <Top title="Budget et dépenses" sub={`${money(td, org.devise)} dépensés sur ${money(tp, org.devise)}`}><ProjectFilter />{canManage && data.projects.length > 0 && <button className="btn" onClick={crud.add}>+ Dépense</button>}</Top>
+      <Top title="Budget et dépenses" sub={`${money(td, org.devise)} dépensés sur ${money(tp, org.devise)}`}><ProjectFilter />{canManage && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Dépense</button>}</Top>
       <div className="card"><h3>Prévu / dépensé par poste</h3>
         <table><thead><tr><th>Poste</th><th className="n">Prévu</th><th className="n">Dépensé</th><th>Consommation</th></tr></thead>
           <tbody>{CATS.map((c) => { const pv = prevu(c), d = dep(c), r = pv ? (d / pv) * 100 : d ? 100 : 0; return <tr key={c}><td>{c}</td><td className="n">{money(pv, org.devise)}</td><td className="n" style={d > pv && pv > 0 ? { color: "var(--bad)" } : undefined}>{money(d, org.devise)}</td><td style={{ minWidth: 130 }}><Bar value={r} red={d > pv} /></td></tr>; })}</tbody></table></div>

@@ -1,3 +1,4 @@
+import { Icon } from "../components/Icon";
 import { useOrg } from "../state/org";
 import { ProjectFilter, inProject } from "../components/Shell";
 import { Pill, Top, type FieldDef } from "../components/ui";
@@ -24,7 +25,7 @@ export function Safety() {
   const rows = inProject(data.incidents, project).slice().sort((a, b) => b.date.localeCompare(a.date));
   return (
     <>
-      <Top title="Sécurité" sub={`${rows.filter((r) => r.statut === "Ouvert").length} incident(s) ouvert(s) sur ${rows.length}`}><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}>+ Incident</button>}</Top>
+      <Top title="Sécurité" sub={`${rows.filter((r) => r.statut === "Ouvert").length} incident(s) ouvert(s) sur ${rows.length}`}><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Incident</button>}</Top>
       <div className="card"><Table crud={crud} rows={rows} empty="Aucun incident enregistré."
         cols={[{ h: "Date", f: (r) => fd(r.date) }, { h: "Chantier", f: (r) => pname(r.project_id) }, { h: "Type", f: (r) => r.type },
           { h: "Gravité", f: (r) => <Pill kind={r.gravite === "Grave" ? "bad" : r.gravite === "Modéré" ? "warn" : ""}>{r.gravite}</Pill> },
