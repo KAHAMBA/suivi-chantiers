@@ -1,9 +1,9 @@
-import { Icon } from "../components/Icon";
 import { useOrg } from "../state/org";
 import { ProjectFilter, inProject } from "../components/Shell";
-import { Bar, Top, type FieldDef } from "../components/ui";
+import { Icon } from "../components/Icon";
+import { Bar, EmptyState, Pill, Top, type FieldDef } from "../components/ui";
 import { Table, useCrud } from "../components/Crud";
-import { CATS, fd, money, todayIso } from "../lib/util";
+import { CATS, fd, money, pc, todayIso } from "../lib/util";
 import type { Expense } from "../lib/types";
 
 export function Budget() {
@@ -20,17 +20,26 @@ export function Budget() {
   if (!data) return null;
   const projects = data.projects.filter((p) => project === "all" || p.id === project);
   const ex = inProject(data.expenses, project).slice().sort((a, b) => b.date.localeCompare(a.date));
-  const prevu = (c: string) => projects.reduce((s, p) => s + (p.bud?.[c] ?? 0), 0);
-  const dep = (c: string) => ex.filter((e) => e.cat === c).reduce((s, e) => s + Number(e.montant), 0);
-  const tp = projects.reduce((s, p) => s + Number(p.budget), 0), td = ex.reduce((s, e) => s + Number(e.montant), 0);
+  const m = (n: number) => money(n, org.devise);
   return (
     <>
-      <Top title="Budget et dépenses" sub={`${money(td, org.devise)} dépensés sur ${money(tp, org.devise)}`}><ProjectFilter />{canManage && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Dépense</button>}</Top>
-      <div className="card"><h3>Prévu / dépensé par poste</h3>
-        <table className="rt"><thead><tr><th>Poste</th><th className="n">Prévu</th><th className="n">Dépensé</th><th>Consommation</th></tr></thead>
-          <tbody>{CATS.map((c) => { const pv = prevu(c), d = dep(c), r = pv ? (d / pv) * 100 : d ? 100 : 0; return <tr key={c}><td data-label="Poste">{c}</td><td data-label="Prévu" className="n tnum">{money(pv, org.devise)}</td><td data-label="Dépensé" className="n tnum" style={d > pv && pv > 0 ? { color: "var(--bad)" } : undefined}>{money(d, org.devise)}</td><td data-label="Consommation" style={{ minWidth: 130 }}><Bar value={r} red={d > pv} /></td></tr>; })}</tbody></table></div>
-      <div className="card"><h3>Dépenses</h3><Table crud={crud} rows={ex} empty="Aucune dépense enregistrée."
-        cols={[{ h: "Date", f: (r) => fd(r.date) }, { h: "Chantier", f: (r) => pname(r.project_id) }, { h: "Poste", f: (r) => r.cat }, { h: "Libellé", f: (r) => r.libelle }, { h: "Montant", n: true, f: (r) => money(r.montant, org.devise) }]} /></div>
+      <Top title="Budget et dépenses" sub="Suivi du prévisionnel et des dépenses par poste">{<ProjectFilter />}{canManage && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Dépense</button>}</Top>
+      {!projects.length && <div className="card"><EmptyState title="Aucun chantier" text="Créez un chantier pour suivre son budget." /></div>}
+      {projects.map((p) => {
+        const rows = CATS.map((c) => ({ c, pr: Number(p.bud?.[c] ?? 0), d: data.expenses.filter((e) => e.project_id === p.id && e.cat === c).reduce((s, e) => s + Number(e.montant), 0) })).filter((r) => r.pr || r.d);
+        const tot = data.expenses.filter((e) => e.project_id === p.id).reduce((s, e) => s + Number(e.montant), 0), v = pc(tot, Number(p.budget));
+        return (
+          <section className="card" key={p.id}>
+            <div className="row between"><h2>{p.nom}</h2><Pill kind={v > 100 ? "bad" : v > 85 ? "warn" : ""}>{v} % consommé</Pill></div>
+            <div style={{ margin: "10px 0 6px" }}><Bar value={v} red={v > 100} /></div>
+            <table className="rt"><thead><tr><th>Poste</th><th className="n">Prévu</th><th className="n">Dépensé</th><th className="n">Reste</th><th>Consommation</th></tr></thead>
+              <tbody>{rows.map((r) => { const x = pc(r.d, r.pr); return <tr key={r.c}><td data-label="Poste">{r.c}</td><td data-label="Prévu" className="n tnum">{m(r.pr)}</td><td data-label="Dépensé" className="n tnum">{m(r.d)}</td><td data-label="Reste" className="n tnum" style={r.pr - r.d < 0 ? { color: "var(--bad)" } : undefined}>{m(r.pr - r.d)}</td><td data-label="Consommation" style={{ minWidth: 130 }}><Bar value={x} red={x > 100} /></td></tr>; })}
+                <tr className="total"><td data-label="Total"><b>Total</b></td><td data-label="Prévu" className="n tnum"><b>{m(Number(p.budget))}</b></td><td data-label="Dépensé" className="n tnum"><b>{m(tot)}</b></td><td data-label="Reste" className="n tnum"><b>{m(Number(p.budget) - tot)}</b></td><td /></tr></tbody></table>
+          </section>
+        );
+      })}
+      <section className="card"><h2>Dépenses enregistrées</h2><Table crud={crud} rows={ex} empty="Aucune dépense enregistrée."
+        cols={[{ h: "Date", f: (r) => fd(r.date) }, { h: "Chantier", f: (r) => pname(r.project_id) }, { h: "Poste", f: (r) => r.cat }, { h: "Libellé", f: (r) => r.libelle }, { h: "Montant", n: true, f: (r) => m(r.montant) }]} /></section>
       {crud.modal}
     </>
   );

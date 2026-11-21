@@ -27,3 +27,7 @@ export const num = (n: number) => new Intl.NumberFormat("fr-FR").format(Math.rou
 export const pct = (n: number) => `${Math.round(n || 0)} %`;
 export const progress = (phases: { av: number }[]) => (phases.length ? Math.round(phases.reduce((s, p) => s + p.av, 0) / phases.length) : 0);
 export const isoDays = (a: string, b: string) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+
+export const planned = (p: { debut: string; fin: string }, today = todayIso()) => Math.round(Math.max(0, Math.min(1, isoDays(p.debut, today) / Math.max(1, isoDays(p.debut, p.fin)))) * 100);
+export const schedule = (av: number, pl: number): ["bad" | "good", string] => { const d = av - pl; return d < -10 ? ["bad", `Retard de ${-d} pts`] : d > 10 ? ["good", `En avance de ${d} pts`] : ["good", "Dans les délais"]; };
+export const pc = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);

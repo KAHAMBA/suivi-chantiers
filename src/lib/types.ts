@@ -6,8 +6,8 @@ export interface Phase { id: string; project_id: string; nom: string; debut: str
 export interface Task { id: string; project_id: string; titre: string; date: string; assigne: string | null; statut: Statut; prio: "haute" | "normale" | "basse"; phase: string | null; created_by: string | null }
 export interface Report { id: string; project_id: string; date: string; meteo: string | null; effectif: number | null; travaux: string; problemes: string | null; created_by: string | null }
 export interface Expense { id: string; project_id: string; cat: string; libelle: string; montant: number; date: string; created_by: string | null }
-export interface Control { id: string; project_id: string; type: string; date: string; resultat: "Conforme" | "Défaut ouvert" | "Défaut corrigé"; note: string | null }
-export interface Incident { id: string; project_id: string; date: string; type: string; gravite: "Mineur" | "Modéré" | "Grave"; description: string | null; mesure: string | null; statut: "Ouvert" | "Clos" }
+export interface Control { id: string; project_id: string; type: string; date: string; resultat: "Conforme" | "Défaut ouvert" | "Défaut corrigé"; note: string | null; created_by: string | null }
+export interface Incident { id: string; project_id: string; date: string; type: string; gravite: "Mineur" | "Modéré" | "Grave"; description: string | null; mesure: string | null; statut: "Ouvert" | "Clos"; created_by: string | null }
 export interface TeamMember { id: string; project_id: string; nom: string; role: string; tel: string | null }
 export interface Member { user_id: string; role: Role; nom: string; email: string }
 export interface Invite { id: string; email: string; role: Role }

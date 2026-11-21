@@ -7,7 +7,7 @@ import { CTRL, fd, todayIso } from "../lib/util";
 import type { Control } from "../lib/types";
 
 export function Quality() {
-  const { data, project, canWrite, pname } = useOrg();
+  const { data, project, canWrite, pname, names } = useOrg();
   const projOpts = (data?.projects ?? []).map((p) => ({ v: p.id, l: p.nom }));
   const fields: FieldDef[] = [
     { name: "project_id", label: "Chantier", type: "select", options: projOpts },
@@ -22,10 +22,11 @@ export function Quality() {
   const ok = rows.filter((c) => c.resultat === "Conforme").length, open = rows.filter((c) => c.resultat === "Défaut ouvert").length;
   return (
     <>
-      <Top title="Qualité" sub={`${rows.length} contrôle(s) · ${ok} conforme(s) · ${open} défaut(s) ouvert(s)`}><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Contrôle</button>}</Top>
+      <Top title="Qualité" sub="Contrôles et défauts constatés"><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Contrôle</button>}</Top>
+      <div className="tiles two"><div className="tile good"><div className="k">Contrôles conformes</div><div className="v tnum">{ok}/{rows.length}</div></div><div className={"tile " + (open ? "bad" : "")}><div className="k">Défauts ouverts</div><div className="v tnum">{open}</div></div></div>
       <div className="card"><Table crud={crud} rows={rows} empty="Aucun contrôle enregistré."
         cols={[{ h: "Date", f: (r) => fd(r.date) }, { h: "Chantier", f: (r) => pname(r.project_id) }, { h: "Contrôle", f: (r) => r.type },
-          { h: "Résultat", f: (r) => <Pill kind={r.resultat === "Défaut ouvert" ? "bad" : ""}>{r.resultat}</Pill> }, { h: "Observations", f: (r) => r.note ?? "—" }]} /></div>
+          { h: "Résultat", f: (r) => <Pill kind={r.resultat === "Défaut ouvert" ? "bad" : ""}>{r.resultat}</Pill> }, { h: "Observation", f: (r) => r.note ?? "—" }, { h: "Saisi par", f: (r) => names(r.created_by) }]} /></div>
       {crud.modal}
     </>
   );

@@ -1,9 +1,9 @@
-import { Icon } from "../components/Icon";
 import { useState } from "react";
 import { api } from "../lib/api";
 import { useOrg } from "../state/org";
-import { Bar, Empty, FormModal, Pill, Top, useToast, type FieldDef } from "../components/ui";
-import { CHECK, CATS, NATURES, addDays, fd, money, pct, progress, todayIso } from "../lib/util";
+import { Icon } from "../components/Icon";
+import { Bar, EmptyState, FormModal, Pill, Top, useToast, type FieldDef } from "../components/ui";
+import { CHECK, NATURES, addDays, fd, money, pc, planned, progress, schedule, todayIso } from "../lib/util";
 import type { Project } from "../lib/types";
 
 const FIELDS: FieldDef[] = [
@@ -19,7 +19,7 @@ const FIELDS: FieldDef[] = [
 ];
 
 export function Projects() {
-  const { data, org, canManage, create, update, remove, reload } = useOrg();
+  const { data, org, canManage, canWrite, create, update, remove, reload } = useOrg();
   const toast = useToast();
   const [sel, setSel] = useState<string | null>(null);
   const [edit, setEdit] = useState<{ row?: Project } | null>(null);
@@ -30,34 +30,27 @@ export function Projects() {
       initial={edit.row ?? { nature: "Maison", debut: todayIso(), fin: addDays(todayIso(), 180), budget: "" }}
       onSubmit={async (v) => { if (edit.row) await update("projects", edit.row.id, clean(v)); else await create("projects", clean(v)); toast("Chantier enregistré."); }} />
   );
+  const del = async (p: Project) => { if (window.confirm("Supprimer ce chantier et toutes ses données ?")) { try { await remove("projects", p.id); setSel(null); toast("Chantier supprimé."); } catch (e: any) { toast(e.message, true); } } };
+  const spent = (id: string) => data.expenses.filter((e) => e.project_id === id).reduce((s, e) => s + Number(e.montant), 0);
   const p = data.projects.find((x) => x.id === sel);
+
   if (p) {
-    const phases = data.phases.filter((x) => x.project_id === p.id);
     const checks = data.checks[p.id] ?? {};
     const total = CHECK.reduce((s, g) => s + g.i.length, 0);
-    const done = Object.entries(checks).filter(([, v]) => v).length;
-    const bud = p.bud ?? {};
+    const done = Object.values(checks).filter(Boolean).length;
     const toggle = async (key: string, value: boolean) => { try { await api.put(`/orgs/${org.id}/checks`, { project_id: p.id, key, value }); await reload(); } catch (e: any) { toast(e.message, true); } };
-    const setAv = async (id: string, av: number) => { try { await update("phases", id, { av }); } catch (e: any) { toast(e.message, true); } };
     return (
       <>
-        <Top title={p.nom} sub={`${p.nature ?? ""} · ${p.lieu ?? ""}`}>
-          <button className="btn ghost" onClick={() => setSel(null)}><Icon n="back" /> Chantiers</button>
-          {canManage && <><button className="btn ghost" onClick={() => setEdit({ row: p })}>Modifier</button>
-            <button className="btn danger" onClick={async () => { if (window.confirm("Supprimer ce chantier et toutes ses données ?")) { try { await remove("projects", p.id); setSel(null); toast("Chantier supprimé."); } catch (e: any) { toast(e.message, true); } } }}>Supprimer</button></>}
-        </Top>
+        <button className="btn ghost sm back" onClick={() => setSel(null)}><Icon n="back" /> Tous les chantiers</button>
         <div className="grid2">
-          <div className="card"><h3>Fiche</h3>
-            <p><b>Maître d’ouvrage :</b> {p.moa || "—"}<br /><b>Maître d’œuvre :</b> {p.moe || "—"}<br /><b>Période :</b> {fd(p.debut)} → {fd(p.fin)}<br /><b>Budget :</b> {money(p.budget, org.devise)}<br /><b>Avancement :</b> {pct(progress(phases))}</p>
-            <p><b>Objectifs :</b> {p.objectifs || "—"}</p></div>
-          <div className="card"><h3>Budget par poste</h3><table className="kv"><tbody>{CATS.map((c) => <tr key={c}><td>{c}</td><td className="n tnum">{money(bud[c] ?? 0, org.devise)}</td></tr>)}</tbody></table></div>
+          <section className="card"><h2>Identification</h2>
+            <dl className="kv"><dt>Nom</dt><dd>{p.nom}</dd><dt>Nature</dt><dd>{p.nature || "—"}</dd><dt>Lieu</dt><dd>{p.lieu || "—"}</dd><dt>Maître d’ouvrage</dt><dd>{p.moa || "—"}</dd><dt>Maître d’œuvre</dt><dd>{p.moe || "—"}</dd><dt>Objectifs</dt><dd>{p.objectifs || "—"}</dd><dt>Budget prévisionnel</dt><dd className="tnum">{money(p.budget, org.devise)}</dd><dt>Période</dt><dd>{fd(p.debut)} au {fd(p.fin)}</dd></dl>
+            {canManage && <div className="acts"><button className="btn ghost sm" onClick={() => setEdit({ row: p })}><Icon n="edit" /> Modifier</button><button className="btn ghost sm danger-t" onClick={() => del(p)}><Icon n="trash" /> Supprimer</button></div>}
+          </section>
+          <section className="card"><div className="row between"><h2>Dossier du projet</h2><Pill kind={done === total ? "" : "grey"}>{done}/{total}</Pill></div><Bar value={pc(done, total)} />
+            <div style={{ marginTop: 14 }}>{CHECK.map((g, gi) => <div className="check-group" key={g.g}><h3>{g.g}</h3>{g.i.map((it, ii) => { const key = `${gi}-${ii}`; return <label className="chk" key={key}><input type="checkbox" disabled={!canWrite} checked={!!checks[key]} onChange={(e) => toggle(key, e.target.checked)} />{it}</label>; })}</div>)}</div>
+          </section>
         </div>
-        <div className="card"><h3>Phases d’exécution</h3>
-          <table className="rt"><thead><tr><th>Phase</th><th>Période</th><th>Avancement</th></tr></thead><tbody>{phases.map((ph) => (
-            <tr key={ph.id}><td data-label="Phase">{ph.nom}</td><td data-label="Période">{fd(ph.debut)} → {fd(ph.fin)}</td>
-              <td data-label="Avancement" style={{ minWidth: 220 }}>{data.role !== "lecteur" ? <div className="row"><input type="range" min={0} max={100} step={5} defaultValue={ph.av} aria-label={`Avancement ${ph.nom}`} onMouseUp={(e) => setAv(ph.id, +(e.target as HTMLInputElement).value)} onKeyUp={(e) => setAv(ph.id, +(e.target as HTMLInputElement).value)} onTouchEnd={(e) => setAv(ph.id, +(e.target as HTMLInputElement).value)} /><span>{ph.av} %</span></div> : <><Bar value={ph.av} /> {ph.av} %</>}</td></tr>))}</tbody></table></div>
-        <div className="card"><h3>Dossier du projet — {done}/{total} éléments</h3><Bar value={(done / total) * 100} />
-          <div className="grid2" style={{ marginTop: 14 }}>{CHECK.map((g, gi) => <div key={g.g}><b>{g.g}</b>{g.i.map((it, ii) => { const key = `${gi}-${ii}`; return <label className="chk" key={key}><input type="checkbox" disabled={data.role === "lecteur"} checked={!!checks[key]} onChange={(e) => toggle(key, e.target.checked)} />{it}</label>; })}</div>)}</div></div>
         {form}
       </>
     );
@@ -65,10 +58,20 @@ export function Projects() {
   return (
     <>
       <Top title="Chantiers" sub={`${data.projects.length} chantier(s)`}>{canManage && <button className="btn" onClick={() => setEdit({})}><Icon n="plus" /> Nouveau chantier</button>}</Top>
-      {!data.projects.length ? <div className="card"><Empty>Aucun chantier. {canManage ? "Cliquez sur « Nouveau chantier »." : "Un conducteur des travaux ou un administrateur peut en créer."}</Empty></div> :
-        <div className="card"><table className="rt"><thead><tr><th>Chantier</th><th>Lieu</th><th>Période</th><th className="n">Budget</th><th>Avancement</th></tr></thead>
-          <tbody>{data.projects.map((x) => { const av = progress(data.phases.filter((ph) => ph.project_id === x.id)); return (
-            <tr key={x.id} style={{ cursor: "pointer" }} onClick={() => setSel(x.id)}><td data-label="Chantier"><button className="link" style={{ fontWeight: 600 }}>{x.nom}</button> {x.demo && <Pill kind="warn">exemple</Pill>}</td><td data-label="Lieu">{x.lieu ?? "—"}</td><td data-label="Période">{fd(x.debut)} → {fd(x.fin)}</td><td data-label="Budget" className="n tnum">{money(x.budget, org.devise)}</td><td data-label="Avancement" className="prog"><Bar value={av} /><span className="tnum">{av} %</span></td></tr>); })}</tbody></table></div>}
+      {!data.projects.length ? <div className="card"><EmptyState title="Aucun chantier" text={canManage ? "Cliquez sur « Nouveau chantier » pour démarrer." : "Un conducteur des travaux ou un administrateur peut en créer."} /></div> :
+        <div className="grid2 cards">{data.projects.map((x) => {
+          const av = progress(data.phases.filter((ph) => ph.project_id === x.id)), [c, l] = schedule(av, planned(x));
+          return (
+            <article className="card" key={x.id}>
+              <div className="row between"><h3>{x.nom}</h3><Pill kind={c === "bad" ? "bad" : ""}>{l}</Pill></div>
+              <div className="small muted" style={{ margin: "2px 0 12px" }}>{[x.nature, x.lieu].filter(Boolean).join(" · ")} {x.demo && <Pill kind="warn">exemple</Pill>}</div>
+              <Bar value={av} />
+              <div className="small muted" style={{ margin: "6px 0 10px" }}>Avancement {av} % · {fd(x.debut)} au {fd(x.fin)}</div>
+              <div className="small tnum">Budget {money(x.budget, org.devise)} · dépensé {money(spent(x.id), org.devise)}</div>
+              <div className="acts"><button className="btn sm" onClick={() => setSel(x.id)}>Ouvrir la fiche</button>
+                {canManage && <><button className="icon-btn" onClick={() => setEdit({ row: x })} aria-label="Modifier" title="Modifier"><Icon n="edit" /></button><button className="icon-btn danger" onClick={() => del(x)} aria-label="Supprimer" title="Supprimer"><Icon n="trash" /></button></>}</div>
+            </article>);
+        })}</div>}
       {form}
     </>
   );

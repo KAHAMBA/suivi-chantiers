@@ -9,7 +9,7 @@ import type { Incident } from "../lib/types";
 const TYPES = ["Non-port des EPI", "Presque-accident", "Accident", "Chute de hauteur", "Incident matériel", "Autre"];
 
 export function Safety() {
-  const { data, project, canWrite, pname } = useOrg();
+  const { data, project, canWrite, pname, names } = useOrg();
   const projOpts = (data?.projects ?? []).map((p) => ({ v: p.id, l: p.nom }));
   const fields: FieldDef[] = [
     { name: "project_id", label: "Chantier", type: "select", options: projOpts },
@@ -25,11 +25,12 @@ export function Safety() {
   const rows = inProject(data.incidents, project).slice().sort((a, b) => b.date.localeCompare(a.date));
   return (
     <>
-      <Top title="Sécurité" sub={`${rows.filter((r) => r.statut === "Ouvert").length} incident(s) ouvert(s) sur ${rows.length}`}><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Incident</button>}</Top>
+      <Top title="Sécurité" sub="Incidents et mesures correctives"><ProjectFilter />{canWrite && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Incident</button>}</Top>
+      <div className="tiles two"><div className={"tile " + (rows.some((r) => r.statut === "Ouvert") ? "warn" : "good")}><div className="k">Incidents ouverts</div><div className="v tnum">{rows.filter((r) => r.statut === "Ouvert").length}</div></div><div className="tile"><div className="k">Jours sans accident grave</div><div className="v tnum">{(() => { const g = rows.filter((r) => r.gravite === "Grave").map((r) => r.date).sort().pop(); return g ? Math.max(0, Math.round((Date.parse(todayIso()) - Date.parse(g)) / 86400000)) : "—"; })()}</div></div></div>
       <div className="card"><Table crud={crud} rows={rows} empty="Aucun incident enregistré."
         cols={[{ h: "Date", f: (r) => fd(r.date) }, { h: "Chantier", f: (r) => pname(r.project_id) }, { h: "Type", f: (r) => r.type },
           { h: "Gravité", f: (r) => <Pill kind={r.gravite === "Grave" ? "bad" : r.gravite === "Modéré" ? "warn" : ""}>{r.gravite}</Pill> },
-          { h: "Description", f: (r) => r.description ?? "—" }, { h: "Mesure", f: (r) => r.mesure ?? "—" }, { h: "Statut", f: (r) => <Pill kind={r.statut === "Ouvert" ? "bad" : ""}>{r.statut}</Pill> }]} /></div>
+          { h: "Description", f: (r) => r.description ?? "—" }, { h: "Mesure", f: (r) => r.mesure ?? "—" }, { h: "Statut", f: (r) => <Pill kind={r.statut === "Ouvert" ? "warn" : ""}>{r.statut}</Pill> }, { h: "Déclaré par", f: (r) => names(r.created_by) }]} /></div>
       {crud.modal}
     </>
   );
