@@ -50,12 +50,12 @@ export function Projects() {
           <div className="card"><h3>Fiche</h3>
             <p><b>Maître d’ouvrage :</b> {p.moa || "—"}<br /><b>Maître d’œuvre :</b> {p.moe || "—"}<br /><b>Période :</b> {fd(p.debut)} → {fd(p.fin)}<br /><b>Budget :</b> {money(p.budget, org.devise)}<br /><b>Avancement :</b> {pct(progress(phases))}</p>
             <p><b>Objectifs :</b> {p.objectifs || "—"}</p></div>
-          <div className="card"><h3>Budget par poste</h3><table><tbody>{CATS.map((c) => <tr key={c}><td>{c}</td><td className="n">{money(bud[c] ?? 0, org.devise)}</td></tr>)}</tbody></table></div>
+          <div className="card"><h3>Budget par poste</h3><table className="kv"><tbody>{CATS.map((c) => <tr key={c}><td>{c}</td><td className="n tnum">{money(bud[c] ?? 0, org.devise)}</td></tr>)}</tbody></table></div>
         </div>
         <div className="card"><h3>Phases d’exécution</h3>
-          <table><thead><tr><th>Phase</th><th>Période</th><th>Avancement</th></tr></thead><tbody>{phases.map((ph) => (
-            <tr key={ph.id}><td>{ph.nom}</td><td>{fd(ph.debut)} → {fd(ph.fin)}</td>
-              <td style={{ minWidth: 220 }}>{data.role !== "lecteur" ? <div className="row"><input type="range" min={0} max={100} step={5} defaultValue={ph.av} aria-label={`Avancement ${ph.nom}`} onMouseUp={(e) => setAv(ph.id, +(e.target as HTMLInputElement).value)} onKeyUp={(e) => setAv(ph.id, +(e.target as HTMLInputElement).value)} onTouchEnd={(e) => setAv(ph.id, +(e.target as HTMLInputElement).value)} /><span>{ph.av} %</span></div> : <><Bar value={ph.av} /> {ph.av} %</>}</td></tr>))}</tbody></table></div>
+          <table className="rt"><thead><tr><th>Phase</th><th>Période</th><th>Avancement</th></tr></thead><tbody>{phases.map((ph) => (
+            <tr key={ph.id}><td data-label="Phase">{ph.nom}</td><td data-label="Période">{fd(ph.debut)} → {fd(ph.fin)}</td>
+              <td data-label="Avancement" style={{ minWidth: 220 }}>{data.role !== "lecteur" ? <div className="row"><input type="range" min={0} max={100} step={5} defaultValue={ph.av} aria-label={`Avancement ${ph.nom}`} onMouseUp={(e) => setAv(ph.id, +(e.target as HTMLInputElement).value)} onKeyUp={(e) => setAv(ph.id, +(e.target as HTMLInputElement).value)} onTouchEnd={(e) => setAv(ph.id, +(e.target as HTMLInputElement).value)} /><span>{ph.av} %</span></div> : <><Bar value={ph.av} /> {ph.av} %</>}</td></tr>))}</tbody></table></div>
         <div className="card"><h3>Dossier du projet — {done}/{total} éléments</h3><Bar value={(done / total) * 100} />
           <div className="grid2" style={{ marginTop: 14 }}>{CHECK.map((g, gi) => <div key={g.g}><b>{g.g}</b>{g.i.map((it, ii) => { const key = `${gi}-${ii}`; return <label className="chk" key={key}><input type="checkbox" disabled={data.role === "lecteur"} checked={!!checks[key]} onChange={(e) => toggle(key, e.target.checked)} />{it}</label>; })}</div>)}</div></div>
         {form}
@@ -66,9 +66,9 @@ export function Projects() {
     <>
       <Top title="Chantiers" sub={`${data.projects.length} chantier(s)`}>{canManage && <button className="btn" onClick={() => setEdit({})}><Icon n="plus" /> Nouveau chantier</button>}</Top>
       {!data.projects.length ? <div className="card"><Empty>Aucun chantier. {canManage ? "Cliquez sur « Nouveau chantier »." : "Un conducteur des travaux ou un administrateur peut en créer."}</Empty></div> :
-        <div className="card"><table><thead><tr><th>Chantier</th><th>Lieu</th><th>Période</th><th className="n">Budget</th><th>Avancement</th></tr></thead>
+        <div className="card"><table className="rt"><thead><tr><th>Chantier</th><th>Lieu</th><th>Période</th><th className="n">Budget</th><th>Avancement</th></tr></thead>
           <tbody>{data.projects.map((x) => { const av = progress(data.phases.filter((ph) => ph.project_id === x.id)); return (
-            <tr key={x.id} style={{ cursor: "pointer" }} onClick={() => setSel(x.id)}><td><button className="link" style={{ fontWeight: 600 }}>{x.nom}</button> {x.demo && <Pill kind="warn">exemple</Pill>}</td><td>{x.lieu ?? "—"}</td><td>{fd(x.debut)} → {fd(x.fin)}</td><td className="n">{money(x.budget, org.devise)}</td><td style={{ minWidth: 120 }}><Bar value={av} /> {av} %</td></tr>); })}</tbody></table></div>}
+            <tr key={x.id} style={{ cursor: "pointer" }} onClick={() => setSel(x.id)}><td data-label="Chantier"><button className="link" style={{ fontWeight: 600 }}>{x.nom}</button> {x.demo && <Pill kind="warn">exemple</Pill>}</td><td data-label="Lieu">{x.lieu ?? "—"}</td><td data-label="Période">{fd(x.debut)} → {fd(x.fin)}</td><td data-label="Budget" className="n tnum">{money(x.budget, org.devise)}</td><td data-label="Avancement" className="prog"><Bar value={av} /><span className="tnum">{av} %</span></td></tr>); })}</tbody></table></div>}
       {form}
     </>
   );

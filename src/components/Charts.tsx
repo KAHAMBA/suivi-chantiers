@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { fd, fdShort, num } from "../lib/util";
 
 // Palette catégorielle validée (daltonisme, contraste) — ordre fixe, jamais cyclique.
@@ -10,6 +10,16 @@ const short = (s: string, n = 16) => (s.length > n ? s.slice(0, n - 1) + "…" :
 const compact = (n: number) => (n >= 1e6 ? `${+(n / 1e6).toFixed(1)} M` : n >= 1e4 ? `${Math.round(n / 1e3)} k` : num(n));
 const niceMax = (v: number) => { const p = Math.pow(10, Math.floor(Math.log10(Math.max(v, 1)))); const m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; };
 
+function useWidth(ref: React.RefObject<HTMLElement>) {
+  const [w, setW] = useState(640);
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    const ro = new ResizeObserver(() => setW(Math.round(el.clientWidth) || 640)); ro.observe(el); setW(Math.round(el.clientWidth) || 640);
+    return () => ro.disconnect();
+  }, [ref]);
+  return w;
+}
+
 function Tip({ x, y, children }: { x: number; y: number; children: ReactNode }) {
   return <div className="tip" style={{ left: x, top: y }} role="status">{children}</div>;
 }
@@ -17,7 +27,23 @@ function Tip({ x, y, children }: { x: number; y: number; children: ReactNode }) 
 export function BarChart({ rows, devise = "" }: { rows: { poste: string; prevu: number; depense: number }[]; devise?: string }) {
   const [hover, setHover] = useState<{ i: number; x: number; y: number } | null>(null);
   const box = useRef<HTMLDivElement>(null);
+  const cw = useWidth(box);
   if (!rows.length) return <div className="empty">Aucun budget ou dépense pour le moment.</div>;
+  if (cw < 520) {
+    const mx = Math.max(1, ...rows.flatMap((r) => [r.prevu, r.depense]));
+    return (
+      <div className="chart hbars" ref={box}>
+        {rows.map((r) => (
+          <div className="hrow" key={r.poste}>
+            <div className="hhead"><span>{r.poste}</span><b className="tnum">{compact(r.depense)} <small>/ {compact(r.prevu)}</small></b></div>
+            <div className="htrack" title={`Prévu ${num(r.prevu)} ${devise}`}><i style={{ width: `${(r.prevu / mx) * 100}%`, background: "#a7d9c3" }} /></div>
+            <div className="htrack" title={`Dépensé ${num(r.depense)} ${devise}`}><i style={{ width: `${(r.depense / mx) * 100}%`, background: r.depense > r.prevu && r.prevu > 0 ? "#c81e1e" : "#047857" }} /></div>
+          </div>
+        ))}
+        <div className="legend"><span><i style={{ background: "#a7d9c3" }} />Prévu</span><span><i style={{ background: "#047857" }} />Dépensé</span><span><i style={{ background: "#c81e1e" }} />Dépassement du prévu</span></div>
+      </div>
+    );
+  }
   const W = 640, H = 290, L = 46, B = 62, T = 14, R = 8;
   const max = niceMax(Math.max(1, ...rows.flatMap((r) => [r.prevu, r.depense])));
   const slot = (W - L - R) / rows.length;
@@ -88,8 +114,9 @@ type Curve = { debut: string | null; fin: string | null; aujourdhui: string; ree
 export function LineChart({ c, devise = "" }: { c: Curve; devise?: string }) {
   const [hov, setHov] = useState<{ t: number; px: number; py: number } | null>(null);
   const box = useRef<HTMLDivElement>(null);
+  const cw = useWidth(box);
   if (!c.debut || !c.fin || !c.prevu.length) return <div className="empty">Pas encore de données pour la courbe.</div>;
-  const W = 640, H = 280, L = 46, B = 30, T = 16, R = 56;
+  const small = cw < 520, W = small ? Math.max(300, cw) : 640, H = small ? 230 : 280, L = small ? 40 : 46, B = 30, T = 16, R = small ? 40 : 56;
   const t0 = Date.parse(c.debut), t1 = Math.max(Date.parse(c.fin), t0 + 86400000);
   const max = niceMax(Math.max(1, c.budget, ...c.reel.map((p) => p[1]), ...c.prevu.map((p) => p[1])));
   const x = (t: number) => L + ((t - t0) / (t1 - t0)) * (W - L - R);
@@ -105,7 +132,7 @@ export function LineChart({ c, devise = "" }: { c: Curve; devise?: string }) {
     const k = W / sv.width, t = t0 + Math.max(0, Math.min(1, ((e.clientX - sv.left) * k - L) / (W - L - R))) * (t1 - t0);
     setHov({ t, px: e.clientX - b.left, py: e.clientY - b.top });
   };
-  const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => t0 + f * (t1 - t0));
+  const ticks = (small ? [0, 0.5, 1] : [0, 0.25, 0.5, 0.75, 1]).map((f) => t0 + f * (t1 - t0));
   const area = `${line(reel)}L${x(Date.parse(last[0])).toFixed(1)} ${y(0)}L${x(Date.parse(reel[0][0])).toFixed(1)} ${y(0)}Z`;
   return (
     <div className="chart" ref={box} onMouseLeave={() => setHov(null)}>
@@ -118,7 +145,7 @@ export function LineChart({ c, devise = "" }: { c: Curve; devise?: string }) {
         {nowT >= t0 && nowT <= t1 && <line x1={x(nowT)} x2={x(nowT)} y1={T} y2={H - B} stroke="#c81e1e" strokeWidth="1" strokeDasharray="2 3" />}
         <circle cx={x(Date.parse(last[0]))} cy={y(last[1])} r="5" fill="#047857" stroke="#fff" strokeWidth="2" />
         <text x={x(Date.parse(last[0])) + 9} y={y(last[1]) + 4} fontSize="12" fontWeight="600" fill="#0b2a21" className="tnum">{compact(last[1])}</text>
-        <text x={W - R + 6} y={y(c.prevu[c.prevu.length - 1][1]) + 4} fontSize="11" fill={TXT}>Prévu</text>
+        {!small && <text x={W - R + 6} y={y(c.prevu[c.prevu.length - 1][1]) + 4} fontSize="11" fill={TXT}>Prévu</text>}
         {hov && <line x1={x(hov.t)} x2={x(hov.t)} y1={T} y2={H - B} stroke="#0b2a21" strokeWidth="1" opacity="0.35" />}
         <rect x={L} y={T} width={W - L - R} height={H - T - B} fill="transparent" onMouseMove={move} onClick={(e) => move(e as unknown as React.MouseEvent<SVGRectElement>)} />
       </svg>

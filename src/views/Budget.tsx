@@ -27,8 +27,8 @@ export function Budget() {
     <>
       <Top title="Budget et dépenses" sub={`${money(td, org.devise)} dépensés sur ${money(tp, org.devise)}`}><ProjectFilter />{canManage && data.projects.length > 0 && <button className="btn" onClick={crud.add}><Icon n="plus" /> Dépense</button>}</Top>
       <div className="card"><h3>Prévu / dépensé par poste</h3>
-        <table><thead><tr><th>Poste</th><th className="n">Prévu</th><th className="n">Dépensé</th><th>Consommation</th></tr></thead>
-          <tbody>{CATS.map((c) => { const pv = prevu(c), d = dep(c), r = pv ? (d / pv) * 100 : d ? 100 : 0; return <tr key={c}><td>{c}</td><td className="n">{money(pv, org.devise)}</td><td className="n" style={d > pv && pv > 0 ? { color: "var(--bad)" } : undefined}>{money(d, org.devise)}</td><td style={{ minWidth: 130 }}><Bar value={r} red={d > pv} /></td></tr>; })}</tbody></table></div>
+        <table className="rt"><thead><tr><th>Poste</th><th className="n">Prévu</th><th className="n">Dépensé</th><th>Consommation</th></tr></thead>
+          <tbody>{CATS.map((c) => { const pv = prevu(c), d = dep(c), r = pv ? (d / pv) * 100 : d ? 100 : 0; return <tr key={c}><td data-label="Poste">{c}</td><td data-label="Prévu" className="n tnum">{money(pv, org.devise)}</td><td data-label="Dépensé" className="n tnum" style={d > pv && pv > 0 ? { color: "var(--bad)" } : undefined}>{money(d, org.devise)}</td><td data-label="Consommation" style={{ minWidth: 130 }}><Bar value={r} red={d > pv} /></td></tr>; })}</tbody></table></div>
       <div className="card"><h3>Dépenses</h3><Table crud={crud} rows={ex} empty="Aucune dépense enregistrée."
         cols={[{ h: "Date", f: (r) => fd(r.date) }, { h: "Chantier", f: (r) => pname(r.project_id) }, { h: "Poste", f: (r) => r.cat }, { h: "Libellé", f: (r) => r.libelle }, { h: "Montant", n: true, f: (r) => money(r.montant, org.devise) }]} /></div>
       {crud.modal}

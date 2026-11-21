@@ -176,3 +176,14 @@ td,.prof b,.orgname,.kc,.dlist span,.lede,.tip,.empty p,.toast{overflow-wrap:any
 @media(max-width:600px){.field.half{flex:1 1 100%}.modal{padding-bottom:max(18px,env(safe-area-inset-bottom))}}
 @media(max-width:900px) and (max-height:520px){.logo img{height:44px}.nav button{padding:9px 12px}.prof{margin-top:6px}}
 @media(max-width:900px){.overlay{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}}
+
+td.mail{overflow-wrap:anywhere;min-width:120px}
+td.tnum,td.prog span,.kpis .tnum{white-space:nowrap}
+.kpis small{white-space:normal}
+.hrow{padding:9px 0;border-bottom:1px solid var(--line)}.hrow:last-of-type{border-bottom:0}
+.hhead{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;margin-bottom:6px}.hhead small{color:var(--muted);font-weight:500}
+.htrack{height:8px;background:#eef3f0;border-radius:99px;overflow:hidden;margin-top:3px}.htrack i{display:block;height:100%;border-radius:99px;min-width:2px}
+@media(min-width:601px) and (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.kpis>div{border-left:1px solid var(--line);border-top:0}.kpis>div:nth-child(3n+1){border-left:0}.kpis>div:nth-child(n+4){border-top:1px solid var(--line)}.kpis>div:nth-child(5){grid-column:span 2}.kpis>div:last-child:nth-child(odd){grid-column:span 2}}
+
+.card table.kv,.panel table.kv{min-width:0!important}
+@media(max-width:720px){.rt td .bar{flex:1;max-width:60%;margin-top:8px}}
