@@ -187,3 +187,26 @@ td.tnum,td.prog span,.kpis .tnum{white-space:nowrap}
 
 .card table.kv,.panel table.kv{min-width:0!important}
 @media(max-width:720px){.rt td .bar{flex:1;max-width:60%;margin-top:8px}}
+
+/* Cartes du tableau de bord (identiques à l'aperçu) */
+.card,.panel{border-radius:18px;box-shadow:0 1px 2px rgba(5,46,34,.06)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:0 1px 2px rgba(5,46,34,.06);min-width:0}
+.tile .k{color:var(--muted);font-size:14.5px}
+.tile .v{font:600 40px/1.1 "Source Serif 4",Georgia,serif;letter-spacing:-.02em;margin:2px 0}
+.tile .s{color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+.tile.good .v{color:var(--accent)}.tile.warn .v{color:var(--warn)}.tile.bad .v{color:var(--bad)}
+.hero{background:linear-gradient(100deg,#04523b 0%,#05a86f 100%);color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:18px;display:block}
+.hero .hl{font-size:14px;letter-spacing:.08em;text-transform:uppercase;opacity:.92}
+.hero .hv{font:600 44px/1.2 "Source Serif 4",Georgia,serif;margin:6px 0 2px}
+.hero .hs{font-size:16px;opacity:.95}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}.item .t{font-weight:600}
+.small{font-size:13px}.muted{color:var(--muted)}.row.between{justify-content:space-between;flex-wrap:nowrap}
+.blk{margin-bottom:14px}.blk .row{margin-bottom:6px}.blk .bar{margin-bottom:4px}
+.panel>.small.muted{margin:-6px 0 8px}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tile{padding:14px 16px}.tile .v{font-size:30px}.hero{padding:20px}.hero .hv{font-size:32px}}
+@media(max-width:380px){.tiles{grid-template-columns:1fr}}
+.item .btn{white-space:nowrap;flex:none}
+@media(min-width:1200px){.tiles{grid-template-columns:repeat(6,minmax(0,1fr))}.tile{padding:18px}.tile .v{font-size:36px}}
+@media(min-width:601px) and (max-width:1199px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
